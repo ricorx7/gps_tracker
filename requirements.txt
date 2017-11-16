@@ -1,0 +1,4 @@
+pyserial
+matplotlib
+pynmea2
+pyqt5
