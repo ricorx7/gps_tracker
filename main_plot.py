@@ -1,10 +1,9 @@
 import serial
 import sys
 import glob
+import pynmea2
+import plot_data
 import threading
-from OutputPort import OutputPort
-import VectorNav
-import Gps
 
 
 def list_serial_ports():
@@ -41,24 +40,40 @@ def list_serial_ports():
     return result
 
 
-def output_all_data():
+def plot():
     """
-    Create all the serial port connections.
-    Take in the Vector Nav compass data.
-    Take in the GPS data.
-    Have the compass and GPS data output to OutputPort.
+    Plot the incoming GPS data.
     :return:
     """
-    # Create an output serial port to output all incoming data
-    output_port = OutputPort()
+    #plot_data.plot_lat_lon_data()
+    plot_data.plot_distance_data()
 
-    # Monitor Incoming Vector Nav data
-    t_vn = threading.Thread(target=VectorNav.monitor, args=(output_port,))
-    t_vn.start()
 
-    # Monitor Incoming GPS data
-    t_gps = threading.Thread(target=Gps.monitor, args=(output_port,))
-    t_gps.start()
+def record_serial():
+    """
+    Record the incoming data to text file.
+    This text file will be read to update the plot.
+    :return:
+    """
+
+    # Open the serial port connection
+    gps = serial.Serial("/dev/tty.usbserial-FTZ7HJUI", baudrate=19200)
+
+    # Read the GPS
+    while True:
+        try:
+            line = gps.readline()
+            line = line.decode("utf-8")
+            #print(line)
+            data = str(line).split(",")
+            if data[0] == "$GPRMC" or data[0] == "$GPGGA":
+                nmea = pynmea2.parse(line)
+                print("Lat: ", nmea.latitude)
+                print("Lon: ", nmea.longitude)
+                with open("gps_pts.txt", "a+") as pos:
+                     pos.write("{},{},{}\n".format(nmea.latitude, nmea.longitude, nmea.timestamp))
+        except Exception as err:
+            print(err)
 
 
 def main():
@@ -68,9 +83,13 @@ def main():
         print(serial_port)
     print("*****************************")
 
-    # Monitor for incoming data and output the data to new serial port
-    t = threading.Thread(target=output_all_data)
+    # Monitor the serial port
+    t = threading.Thread(target=record_serial)
     t.start()
+
+    # Start plotting the data
+    plot()
+
 
 if __name__ == "__main__":
     main()
