@@ -97,3 +97,6 @@ ENV/
 
 gps_pts.txt
 
+.idea/
+.idea/*
+
