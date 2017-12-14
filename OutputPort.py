@@ -19,6 +19,7 @@ class OutputPort:
         # Open the UDP port connection
         self.sock = socket.socket(socket.AF_INET,                            # Internet
                              socket.SOCK_DGRAM)                              # UDP
+        self.sock.connect((Settings.UDP_IP, Settings.UDP_PORT))              # Connect
 
     def write(self, data):
         """
@@ -26,8 +27,15 @@ class OutputPort:
         :param data: Data to write
         :return:
         """
-        # Write the incoming data to the serial port
-        self.serial_port.write(data)
+        try:
+            # Write the incoming data to the serial port
+            self.serial_port.write(data)
+        except Exception as err:
+            print("Error outputting data to serial port. ", err)
 
-        # Write the incoming data to the UDP port
-        self.sock(data, (Settings.UDP_IP, Settings.UDP_PORT))
+
+        try:
+            # Write the incoming data to the UDP port
+            self.sock.send(data)
+        except Exception as err:
+            print("Error sending data to UDP port. ", err)
