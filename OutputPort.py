@@ -21,9 +21,8 @@ class OutputPort:
         self.conn_list = []
         self.sock = socket.socket(socket.AF_INET,                            # Internet
                              socket.SOCK_DGRAM)                              # UDP
-        self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self.sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-        #self.sock.bind((Settings.UDP_IP, Settings.UDP_PORT))                 # Connect
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)      # Setup UDP for broadcast to port
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
     def write(self, data):
         """
@@ -40,6 +39,7 @@ class OutputPort:
 
         try:
             # Write the incoming data to the UDP port
+            # UDP Broadcast IP should be 255.255.255.255
             self.sock.sendto(data, (Settings.UDP_IP, Settings.UDP_PORT))
         except Exception as err:
             print("Error sending data to UDP port. ", err)
