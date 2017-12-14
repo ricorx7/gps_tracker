@@ -1,5 +1,6 @@
 import serial
 import socket
+import threading
 import Settings as Settings
 
 
@@ -21,6 +22,8 @@ class OutputPort:
         self.sock = socket.socket(socket.AF_INET,                            # Internet
                              socket.SOCK_DGRAM)                              # UDP
         self.sock.bind((Settings.UDP_IP, Settings.UDP_PORT))                 # Connect
+        t_upd = threading.Thread(target=monitor_udp_conn)
+        t_udp.start()
 
     def write(self, data):
         """
@@ -43,7 +46,11 @@ class OutputPort:
             print("Error sending data to UDP port. ", err)
 
 
-    def make_udp_conn(self):
+    def monitor_udp_conn(self):
+        """
+        Monitor for incoming UDP connections.
+        :return: 
+        """
         self.sock.listen(5)                         # Max 5 connections
         while True:
             # Handle connection
