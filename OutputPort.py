@@ -17,9 +17,10 @@ class OutputPort:
                                          baudrate=Settings.OUTPUT_BAUD)      # Baud
 
         # Open the UDP port connection
+        self.conn_list = []
         self.sock = socket.socket(socket.AF_INET,                            # Internet
                              socket.SOCK_DGRAM)                              # UDP
-        self.sock.connect((Settings.UDP_IP, Settings.UDP_PORT))              # Connect
+        self.sock.bind((Settings.UDP_IP, Settings.UDP_PORT))                 # Connect
 
     def write(self, data):
         """
@@ -36,6 +37,17 @@ class OutputPort:
 
         try:
             # Write the incoming data to the UDP port
-            self.sock.send(data)
+            for conn in self.conn_list:
+                conn.send(data)
         except Exception as err:
             print("Error sending data to UDP port. ", err)
+
+
+    def make_udp_conn(self):
+        self.sock.listen(5)                         # Max 5 connections
+        while True:
+            # Handle connection
+            c, addr = self.sock.accept()            # Wait for connections
+            print("Connection made with : ", addr)
+
+            self.conn_list.add(c)                   # Add the connection to the list
