@@ -21,7 +21,9 @@ class OutputPort:
         self.conn_list = []
         self.sock = socket.socket(socket.AF_INET,                            # Internet
                              socket.SOCK_DGRAM)                              # UDP
-        self.sock.bind((Settings.UDP_IP, Settings.UDP_PORT))                 # Connect
+        self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+        #self.sock.bind((Settings.UDP_IP, Settings.UDP_PORT))                 # Connect
 
     def write(self, data):
         """

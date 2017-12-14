@@ -12,5 +12,5 @@ OUTPUT_PORT = '/dev/tty.usbserial-FTA59ZPN'
 OUTPUT_BAUD = 115200
 
 # UDP Output
-UDP_IP = ""
+UDP_IP = "255.255.255.255"
 UDP_PORT = 1257
