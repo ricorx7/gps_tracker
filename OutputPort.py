@@ -22,8 +22,6 @@ class OutputPort:
         self.sock = socket.socket(socket.AF_INET,                            # Internet
                              socket.SOCK_DGRAM)                              # UDP
         self.sock.bind((Settings.UDP_IP, Settings.UDP_PORT))                 # Connect
-        t_upd = threading.Thread(target=monitor_udp_conn)
-        t_udp.start()
 
     def write(self, data):
         """
@@ -40,21 +38,7 @@ class OutputPort:
 
         try:
             # Write the incoming data to the UDP port
-            for conn in self.conn_list:
-                conn.send(data)
+            self.sock.sendto(data, (Settings.UDP_IP, Settings.UDP_PORT))
         except Exception as err:
             print("Error sending data to UDP port. ", err)
 
-
-    def monitor_udp_conn(self):
-        """
-        Monitor for incoming UDP connections.
-        :return: 
-        """
-        self.sock.listen(5)                         # Max 5 connections
-        while True:
-            # Handle connection
-            c, addr = self.sock.accept()            # Wait for connections
-            print("Connection made with : ", addr)
-
-            self.conn_list.add(c)                   # Add the connection to the list
