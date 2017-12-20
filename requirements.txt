@@ -3,4 +3,4 @@ matplotlib
 pynmea2
 pyqt5
 seaborn
-vincenty
+geopy
