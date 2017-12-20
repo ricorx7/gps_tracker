@@ -9,3 +9,12 @@ The Vector Nav data will be convert to a NMEA $GPHDT message.
 ## main_plot
 
 Plot the GPS position
+
+### INSTALL Notes
+Windows 10 Bash
+
+If you get an error about ImportError LibGL
+```
+sudo apt install libgl1-mesa-glx
+sudo apt install python3-pyqt5
+```

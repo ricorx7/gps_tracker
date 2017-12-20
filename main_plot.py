@@ -55,23 +55,32 @@ def record_serial():
     This text file will be read to update the plot.
     :return:
     """
-
-    # Open the serial port connection
-    gps = serial.Serial("/dev/tty.usbserial-FTZ7HJUI", baudrate=19200)
+    try:
+        # Open the serial port connection
+        gps = serial.Serial("COM40", baudrate=9600)
+    except serial.serialutil.SerialException as err:
+        print("Serial port not found.\n", err)
+        exit()
+    except FileNotFoundError as err:
+        print("Serial port not found.\n", err)
+        exit()
+    except Exception as err:
+        print("Error opening serial port.\n", err)
+        exit()
 
     # Read the GPS
     while True:
         try:
             line = gps.readline()
             line = line.decode("utf-8")
-            #print(line)
+            print(line)
             data = str(line).split(",")
             if data[0] == "$GPRMC" or data[0] == "$GPGGA":
                 nmea = pynmea2.parse(line)
                 print("Lat: ", nmea.latitude)
                 print("Lon: ", nmea.longitude)
                 with open("gps_pts.txt", "a+") as pos:
-                     pos.write("{},{},{}\n".format(nmea.latitude, nmea.longitude, nmea.timestamp))
+                     pos.write("{},{},{}\n".format(str(nmea.latitude), str(nmea.longitude), str(nmea.timestamp)))
         except Exception as err:
             print(err)
 
@@ -83,13 +92,22 @@ def main():
         print(serial_port)
     print("*****************************")
 
-    # Monitor the serial port
-    t = threading.Thread(target=record_serial)
-    t.start()
+    try:
+        # Monitor the serial port
+        t = threading.Thread(target=record_serial)
+        t.start()
 
-    # Start plotting the data
-    plot()
-
+        # Start plotting the data
+        plot()
+    except serial.serialutil.SerialException as err:
+        print("Serial port not found.\n", err)
+        exit()
+    except FileNotFoundError as err:
+        print("Serial port not found.\n", err)
+        exit()
+    except Exception as err:
+        print("Error Running application.\n", err)
+        exit()
 
 if __name__ == "__main__":
     main()

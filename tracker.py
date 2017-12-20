@@ -1,5 +1,7 @@
 from geopy.distance import vincenty
-import tracker_settings as settings
+import Settings_tracker as settings
+import serial
+import pynmea2
 
 
 class Tracker:
@@ -16,6 +18,9 @@ class Tracker:
         # Open the serial port connection
         self.serial_port = serial.Serial(settings.TRACKER_PORT,               # Serial Port
                                          baudrate=settings.TRACKER_BAUD)      # Baud
+
+        # Open file to record data
+        self.file = open("gps_pts.txt", "a+", 128)                            # Set a small buffer size
 
         # Start tracking
         self.track()
@@ -44,8 +49,9 @@ class Tracker:
 
                     # Parse the NMEA string
                     nmea = pynmea2.parse(line)
-                    print("Lat: ", nmea.latitude)
-                    print("Lon: ", nmea.longitude)
+                    if self.first_pt:
+                        print("First Pt: {}, {}".format(self.first_pt.latitude, self.first_pt.longitude))
+                    print("Curr  Pt: {}, {}".format(nmea.latitude, nmea.longitude))
 
                     # Record positions
                     self.record_position(nmea)
@@ -62,8 +68,7 @@ class Tracker:
         :param nmea: NMEA data.
         :return:
         """
-        with open("gps_pts.txt", "a+") as pos:
-            pos.write("{},{},{}\n".format(nmea.latitude, nmea.longitude, nmea.timestamp))
+        self.file.write("{},{},{}\n".format(nmea.latitude, nmea.longitude, nmea.timestamp))
 
     def calc_distanced_traveled(self, nmea):
         """
@@ -74,9 +79,11 @@ class Tracker:
         if self.first_pt is None:
             # Store the first point
             self.first_pt = nmea
+            print("FIRST POINT SET: {}, {}".format(self.first_pt.latitude, self.first_pt.longitude))
         else:
             # Calculate DMG
             first_pt = (self.first_pt.latitude, self.first_pt.longitude)
             curr_pt = (nmea.latitude, nmea.longitude)
             dmg = vincenty(first_pt, curr_pt).meters
             print("DMG: {} meters".format(dmg))
+            print("--------------------------")

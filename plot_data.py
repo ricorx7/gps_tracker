@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 from matplotlib import style
 import os
 from datetime import datetime
-from vincenty import vincenty
+from geopy.distance import vincenty
 
 #style.use('fivethirtyeight')
 style.use('seaborn')

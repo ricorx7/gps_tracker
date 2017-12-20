@@ -1,0 +1,3 @@
+# Tracker Serial port
+TRACKER_PORT = "COM40"
+TRACKER_BAUD = 9600
